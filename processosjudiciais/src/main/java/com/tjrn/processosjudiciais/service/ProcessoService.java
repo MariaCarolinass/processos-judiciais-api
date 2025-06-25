@@ -1,10 +1,12 @@
 package com.tjrn.processosjudiciais.service;
 
-import java.io.ObjectInputFilter.Status;
+import com.tjrn.processosjudiciais.model.Status;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import com.tjrn.processosjudiciais.model.Audiencia;
 import com.tjrn.processosjudiciais.model.Processo;
 import com.tjrn.processosjudiciais.repository.ProcessoRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ProcessoService {
@@ -48,12 +50,56 @@ public class ProcessoService {
                 .orElseThrow(() -> new IllegalArgumentException("Processo não encontrado com o ID: " + id));
     }
     
+    @Transactional
     public Processo save(Processo processo) {
-        String regex = "^\\d{7}-\\d{2}\\.\\d{4}\\.\\d\\.\\d{2}\\.\\d{4}$";
-        if (!processo.getNumProcesso().matches(regex)) {
-            throw new IllegalArgumentException("Número de processo inválido. Formato esperado: 1234567-89.2024.0.12.3456");
+        if (repository.existsByNumProcesso(processo.getNumProcesso())) {
+            throw new IllegalArgumentException("Já existe um processo com esse número.");
         }
-        return repository.save(processo);
+        
+        if (processo.getId() != null) {
+            Processo existente = repository.findById(processo.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Processo não encontrado com o ID: " + processo.getId()));
+
+            existente.setNumProcesso(processo.getNumProcesso());
+            existente.setVara(processo.getVara());
+            existente.setComarca(processo.getComarca());
+            existente.setAssunto(processo.getAssunto());
+            existente.setStatus(processo.getStatus());
+
+            existente.getAudienciaList().removeIf(audExistente -> 
+                processo.getAudienciaList() == null || processo.getAudienciaList().stream()
+                    .noneMatch(audRecebida -> audRecebida.getId() != null && audRecebida.getId().equals(audExistente.getId()))
+            );
+
+            if (processo.getAudienciaList() != null) {
+                for (Audiencia audRecebida : processo.getAudienciaList()) {
+                    if (audRecebida.getId() == null) {
+                        audRecebida.setProcesso(existente);
+                        existente.getAudienciaList().add(audRecebida);
+                    } else {
+                        Audiencia audExistente = existente.getAudienciaList().stream()
+                            .filter(aud -> aud.getId().equals(audRecebida.getId()))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Audiência não encontrada com o ID: " + audRecebida.getId()));
+
+                        audExistente.setData(audRecebida.getData());
+                        audExistente.setHora(audRecebida.getHora());
+                        audExistente.setLocal(audRecebida.getLocal());
+                        audExistente.setTipoAudiencia(audRecebida.getTipoAudiencia());
+                    }
+                }
+            }
+
+            return repository.save(existente);
+        } else {
+            if (processo.getAudienciaList() != null) {
+                for (Audiencia aud : processo.getAudienciaList()) {
+                    aud.setProcesso(processo);
+                    aud.setId(null);
+                }
+            }
+            return repository.save(processo);
+        }
     }
 
 }
