@@ -50,6 +50,14 @@ Pré-instalar:
 - JDK 17+
 - Maven 3+
 
+Caso tenha mais de uma versão instalada do Java, configure as variáveis de ambiente para alterar a versão do JDK:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/jdk-17.0.12/
+export PATH=$JAVA_HOME/bin:$PATH
+java -version
+```
+
 ### ▶️ Passos
 
 ```bash
