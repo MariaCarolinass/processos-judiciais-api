@@ -45,6 +45,8 @@ API REST desenvolvida com **Spring Boot** para o gerenciamento de processos judi
 
 ### 🔧 Requisitos
 
+Pré-instalar:
+
 - JDK 17+
 - Maven 3+
 
@@ -52,7 +54,7 @@ API REST desenvolvida com **Spring Boot** para o gerenciamento de processos judi
 
 ```bash
 # Clone o repositório
-git clone <url-do-repositorio>
+git clone https://github.com/MariaCarolinass/processos-judiciais-api.git
 cd processos-judiciais-api
 
 # Rodar a aplicação
