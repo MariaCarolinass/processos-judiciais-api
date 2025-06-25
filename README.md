@@ -55,7 +55,7 @@ Pré-instalar:
 ```bash
 # Clone o repositório
 git clone https://github.com/MariaCarolinass/processos-judiciais-api.git
-cd processos-judiciais-api
+cd processos-judiciais-api/processosjudiciais/
 
 # Rodar a aplicação
 mvn spring-boot:run
@@ -65,6 +65,19 @@ Acesse a aplicação:
 [http://localhost:8080](http://localhost:8080)
 
 ---
+
+## 🎲 Banco de dados
+
+Acesse via H2 Console:
+
+```
+http://localhost:8080/h2-console/
+```
+
+- username: `sa`
+- password: `vázia`
+
+Para configurar outro banco de dados acesse o arquivo `application.properties` dentro de `resources/`.
 
 ## 🔐 Autenticação com JWT
 
