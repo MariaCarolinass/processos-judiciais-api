@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.tjrn.processosjudiciais.model.Audiencia;
 import com.tjrn.processosjudiciais.model.Status;
 import com.tjrn.processosjudiciais.repository.AudienciaRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class AudienciaService {
@@ -25,10 +27,15 @@ public class AudienciaService {
         return repository.findAll();
     }
     
+    @Transactional
     public Audiencia save(Audiencia audiencia) {
+        if (audiencia.getProcesso() == null || audiencia.getProcesso().getId() == null) {
+            throw new IllegalArgumentException("Audiência deve estar vinculada a um processo existente.");
+        }
+
         boolean isValid = repository.existsByLocalAndProcessoVara(
             audiencia.getLocal(), audiencia.getProcesso().getVara());
-        
+
         DayOfWeek diaSemana = audiencia.getData().getDayOfWeek();
         if (diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY) {
             throw new IllegalArgumentException("Audiências só podem ser marcadas em dias úteis (segunda a sexta-feira).");
@@ -44,6 +51,20 @@ public class AudienciaService {
 
         if (audiencia.getProcesso().getStatus() == Status.SUSPENSO) {
             throw new IllegalArgumentException("Não é possível agendar audiência para processo suspenso.");
+        }
+
+         Audiencia managedAudiencia;
+
+        if (audiencia.getId() != null) {
+            managedAudiencia = repository.findById(audiencia.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Audiência não encontrada para atualização."));
+            managedAudiencia.setData(audiencia.getData());
+            managedAudiencia.setHora(audiencia.getHora());
+            managedAudiencia.setLocal(audiencia.getLocal());
+            managedAudiencia.setTipoAudiencia(audiencia.getTipoAudiencia());
+            managedAudiencia.setProcesso(audiencia.getProcesso());
+        } else {
+            managedAudiencia = audiencia;
         }
 
         return repository.save(audiencia);
