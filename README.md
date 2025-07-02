@@ -34,6 +34,7 @@ API REST desenvolvida com **Spring Boot** para o gerenciamento de processos judi
 - **Spring Boot** (Web, Security, Data JPA)
 - **JWT** (Autenticação com `jjwt`)
 - **Springdoc OpenAPI** (Swagger UI)
+- **Mapstruct** (Mapeamento de DTOs)
 - **H2 Database** (padrão) ou PostgreSQL
 - **Jakarta Servlet API**
 - **JUnit 5**
@@ -95,7 +96,7 @@ Para configurar outro banco de dados acesse o arquivo `application.properties` d
 curl -X POST "http://localhost:8080/auth/login?username=admin&password=123"
 ```
 
-Por padrão use admin como username e 123 como senha.
+Por padrão utilize `admin` como username e `123` como senha.
 
 ### 2. Enviar o token no header das requisições:
 
